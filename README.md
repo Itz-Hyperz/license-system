@@ -10,3 +10,5 @@ This is a complex yet simple to use license system that will stop people from ta
 # Credits
 - [@Hyperz](https://hyperz.net/discord) - *Physical Programming*
 - [@FAXES](https://faxes.zone/discord) - *Original Inspiration*
+
+![Keys Image Thing](https://cdn.hyperz.net/main/689JhO.png)
