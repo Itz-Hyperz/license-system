@@ -1,4 +1,5 @@
 const express = require('express')
+const chalk = require('chalk')
 
 function startApi(client, con) {
 
@@ -22,14 +23,14 @@ function startApi(client, con) {
     app.get('/api/:checkKey', async (req, res) => {
         res.set('Access-Control-Allow-Origin', '*');
         let key = req.params.checkKey
-        if(!req.headers.productId) {
+        if(!req.headers.productid) {
             let json_ = {
                 authorized: false,
                 reason: "No Product Id Provided in Headers of the request."
             }
             return res.type('json').send(JSON.stringify(json_, null, 4) + '\n');
         }
-        await con.query(`SELECT * FROM licenses WHERE authKey='${key}' AND id='${req.headers.productId}'`, async (err, row) => {
+        await con.query(`SELECT * FROM licenses WHERE authKey='${key}' AND id='${req.headers.productid}'`, async (err, row) => {
             if(err) throw err;
             if(row[0]) {
                 if(row[0].authIp === req.headers['x-real-ip'].toLocaleString()) {
@@ -37,7 +38,7 @@ function startApi(client, con) {
                         console.log(chalk.yellow('[ACTION LOGS] '), `ID: ${row[0].id} | IP: ${req.headers['x-real-ip']} | Key: ${key} | Authorized: true | Accepted Request`)
                     }
                     let json_ = {
-                        id: `${row[0].id}`,
+                        id: row[0].id,
                         authorized: true,
                         requestingIp: `${req.headers['x-real-ip']}`,
                         licenseOwner: `${row[0].licenseOwnerId}`
@@ -48,7 +49,7 @@ function startApi(client, con) {
                         console.log(chalk.yellow('[ACTION LOGS] '), `ID: ${row[0].id} | IP: ${req.headers['x-real-ip']} | Key: ${key} | Authorized: false | Invalid Auth IP`)
                     }
                     let json_ = {
-                        id: `${row[0].id}`,
+                        id: row[0].id,
                         authorized: false,
                         requestingIp: `${req.headers['x-real-ip']}`,
                         licenseOwner: `${row[0].licenseOwnerId}`
