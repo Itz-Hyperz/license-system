@@ -13,7 +13,7 @@ async function licenseCheck(key, keyId) {
 
     // Initial Check
     let checkres = await axios({
-        method: 'post', // Post Request
+        method: 'get', // Post Request
         url: `https://license.hyperz.net/api/${key}`, // Your domain with your license key at the end
         headers: {Accept: 'application/json, text/plain, */*','User-Agent': '*', 'productId': keyId } // The product Id given when the license key is created (keyId)
     });
@@ -27,7 +27,7 @@ async function licenseCheck(key, keyId) {
     // Timed check to repeat ever hour
     setInterval(async () => {
         let checkres = await axios({
-            method: 'post', // Post Request
+            method: 'get', // Post Request
             url: `https://license.hyperz.net/api/${key}`, // Your domain with your license key at the end
             headers: {Accept: 'application/json, text/plain, */*','User-Agent': '*', 'productId': keyId } // The product Id given when the license key is created
         });
