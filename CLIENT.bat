@@ -1,7 +1,7 @@
 :: This file was made by anusO1#6969
 @echo off
 color 0a
-echo v13 Discord Bot
+echo License System
 echo 1. Start
 echo 2. Install
 echo Select one: 
