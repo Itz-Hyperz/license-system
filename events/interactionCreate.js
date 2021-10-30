@@ -1,5 +1,3 @@
-
-
 const { MessageEmbed, MessageActionRow, MessageButton } = require(`discord.js`);
 
 module.exports = async(client, con, interaction) => {
