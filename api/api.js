@@ -33,7 +33,7 @@ function startApi(client, con) {
         await con.query(`SELECT * FROM licenses WHERE authKey='${key}' AND id='${req.headers.productid}'`, async (err, row) => {
             if(err) throw err;
             if(row[0]) {
-                if(row[0].authIp === req.headers['x-real-ip'].toLocaleString()) {
+                if(row[0].authIp == req.headers['x-real-ip'].toLocaleString()) {
                     if(client.config.api.logActions) {
                         console.log(chalk.yellow('[ACTION LOGS] '), `ID: ${row[0].id} | IP: ${req.headers['x-real-ip']} | Key: ${key} | Authorized: true | Accepted Request`)
                     }
