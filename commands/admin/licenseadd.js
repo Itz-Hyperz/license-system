@@ -4,8 +4,7 @@ exports.run = async (client, message, args, con) => {
 
     let check = await client.utils.permCheck(client, message.author.id)
     if(!check) return message.channel.send({ content: "You are not a listed manager in the license system config file." });
-    if(!args[0]) return message.channel.send({ content: "Please include a User Id when creating a license." });
-    if(!isNaN(args[0])) return message.channel.send({ content: "Please include a User Id when creating a license." });
+    if(!args[0]) return message.channel.send({ content: "Please include a User Id when creating a license." })
 
     await con.query(`SELECT COUNT(id) as total FROM licenses`, async (err, row) => {
         if(err) throw err;
