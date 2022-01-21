@@ -5,9 +5,14 @@
 
 // Import Axios
 const axios = require('axios')
+
+// Data for checking licenses
 let key = 'YOUR_LICENSE_KEY_HERE'; // Your license key goes here
 let keyId = 5; // The Id given to you when a users license is created for them
-licenseCheck(key, keyId)
+licenseCheck(key, keyId);
+
+// Data for creating a license
+addLicense("704094587836301392"); // The owner Id you are registering the license to (Discord Account Id)
 
 async function licenseCheck(key, keyId) {
 
@@ -39,6 +44,19 @@ async function licenseCheck(key, keyId) {
         }
     }, 3600000); // Every 1 hour
 
+}
+
+async function addLicense(ownerId) {
+    let newLicense = await axios({
+        method: 'get',
+        url: "http://localhost:3000/addLicense",
+        headers: {Accept: 'application/json, text/plain, */*','User-Agent': '*', 'secret': 'somesecretlol', 'ownerid': ownerId }
+    });
+    if(!newLicense.data.error) { // If no error is found
+        console.log(`New license created: `, newLicense.data.licenseInfo) // Log the new license information (JSON Object)
+    } else { // If an error is found
+        console.log(`License Add Error: `, newLicense.data.reason) // Log the error
+    }
 }
 
 //////////////////////////////////////////////////////////////////////
