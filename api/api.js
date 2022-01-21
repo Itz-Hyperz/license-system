@@ -1,5 +1,6 @@
 const express = require('express')
-const chalk = require('chalk')
+const chalk = require('chalk');
+const mysql = require('mysql')
 
 function startApi(client, con) {
 
@@ -10,8 +11,8 @@ function startApi(client, con) {
     app.get('/', async (req, res) => {
         res.set('Access-Control-Allow-Origin', '*');
         let json_ = {
-            status: "Active",
-            author: "Hyperz#0001"
+            "status": "Active",
+            "author": "Hyperz#0001"
         }
         res.type('json').send(JSON.stringify(json_, null, 4) + '\n');
     });
@@ -25,8 +26,8 @@ function startApi(client, con) {
         let key = req.params.checkKey
         if(!req.headers.productid) {
             let json_ = {
-                authorized: false,
-                reason: "No Product Id Provided in Headers of the request."
+                "authorized": false,
+                "reason": "No Product Id Provided in Headers of the request."
             }
             return res.type('json').send(JSON.stringify(json_, null, 4) + '\n');
         }
@@ -38,10 +39,10 @@ function startApi(client, con) {
                         console.log(chalk.yellow('[ACTION LOGS] '), `ID: ${row[0].id} | IP: ${req.headers['x-real-ip']} | Key: ${key} | Authorized: true | Accepted Request`)
                     }
                     let json_ = {
-                        id: row[0].id,
-                        authorized: true,
-                        requestingIp: `${req.headers['x-real-ip']}`,
-                        licenseOwner: `${row[0].licenseOwnerId}`
+                        "id": row[0].id,
+                        "authorized": true,
+                        "requestingIp": `${req.headers['x-real-ip']}`,
+                        "licenseOwner": `${row[0].licenseOwnerId}`
                     }
                     res.type('json').send(JSON.stringify(json_, null, 4) + '\n');
                 } else {
@@ -49,10 +50,10 @@ function startApi(client, con) {
                         console.log(chalk.yellow('[ACTION LOGS] '), `ID: ${row[0].id} | IP: ${req.headers['x-real-ip']} | Key: ${key} | Authorized: false | Invalid Auth IP`)
                     }
                     let json_ = {
-                        id: row[0].id,
-                        authorized: false,
-                        requestingIp: `${req.headers['x-real-ip']}`,
-                        licenseOwner: `${row[0].licenseOwnerId}`
+                        "id": row[0].id,
+                        "authorized": false,
+                        "requestingIp": `${req.headers['x-real-ip']}`,
+                        "licenseOwner": `${row[0].licenseOwnerId}`
                     }
                     res.type('json').send(JSON.stringify(json_, null, 4) + '\n');
                 }
@@ -61,21 +62,74 @@ function startApi(client, con) {
                     console.log(chalk.yellow('[ACTION LOGS] '), `IP: ${req.headers['x-real-ip']} | Key: ${key} | Authorized: false | License Key Not Found`)
                 }
                 let json_ = {
-                    authorized: false,
-                    requestingIp: `${req.headers['x-real-ip']}`,
-                    reason: `License Key Not Found...`
+                    "authorized": false,
+                    "requestingIp": `${req.headers['x-real-ip']}`,
+                    "reason": `License Key Not Found...`
                 }
                 res.type('json').send(JSON.stringify(json_, null, 4) + '\n');
             }
         });
     });
 
+    // Add Licenses
+    app.get('/addLicense', async (req, res) => {
+        res.set('Access-Control-Allow-Origin', '*');
+        let id;
+        if(!req.headers.secret) {
+            let json_ = {
+                "authorized": false,
+                "error": true,
+                "reason": "No Secret Provided in Headers of the request."
+            }
+            return res.type('json').send(JSON.stringify(json_, null, 4) + '\n');
+        }
+        if(req.headers.secret === client.config.api.newLicenseSecret) {
+            if(!req.headers) {
+                let json_ = {
+                    "authorized": false,
+                    "error": true,
+                    "reason": "Missing parameters provided in request."
+                }
+                return res.type('json').send(JSON.stringify(json_, null, 4) + '\n');
+            }
+            let balls = await makeid(18)
+            await con.query(`SELECT COUNT(id) as total FROM licenses`, async (err, row) => {
+                if(err) throw err;
+                id = Number(row[0].total) + 1;
+                await con.query(`INSERT INTO licenses (id, authKey, licenseOwnerId, authIp) VALUES ("${id}", "${balls}", "${req.headers.ownerid}", "NA")`, async (err, row) => {
+                    if(err) throw err;
+                });
+            });
+            setTimeout(() => {
+                let json_ = {
+                    "authorized": false,
+                    "error": false,
+                    "reason": "NA",
+                    "licenseInfo": {
+                        "id": id,
+                        "authKey": balls,
+                        "licenseOwnerId": req.headers.ownerid,
+                        "authIp": "NA"
+                    }
+                }
+                return res.type('json').send(JSON.stringify(json_, null, 4) + '\n');
+            }, 100)
+        } else {
+            let json_ = {
+                "authorized": false,
+                "error": true,
+                "reason": "Invalid Secret Provided in Headers of the request."
+            }
+            return res.type('json').send(JSON.stringify(json_, null, 4) + '\n');
+        }
+    });
+
     // Admin Enforcement
     app.get('/owners', async (req, res) => {
         res.set('Access-Control-Allow-Origin', '*');
         let json_ = {
-            authorized: false,
-            listedOwners: client.config.permissions.managers
+            "authorized": false,
+            "listedOwners": client.config.permissions.managers
         }
         res.type('json').send(JSON.stringify(json_, null, 4) + '\n');
     });
@@ -84,12 +138,22 @@ function startApi(client, con) {
     app.get('*', function(req, res){
         res.set('Access-Control-Allow-Origin', '*');
         let json_ = {
-            authorized: false, 
-            reason: "Invalid Request Location"
+            "authorized": false, 
+            "reason": "Invalid Request Location"
         }
         res.type('json').send(JSON.stringify(json_, null, 4) + '\n');
     });
 
+}
+
+async function makeid(length) {
+    let result           = '';
+    let characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let charactersLength = characters.length;
+    for ( let i = 0; i < length; i++ ) {
+      result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
+   return result;
 }
 
 exports.startApi = startApi;
