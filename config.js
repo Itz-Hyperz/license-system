@@ -32,7 +32,8 @@ const _config = {
     // API Settings (REQUIRED)
     api: {
         port: "3000", // The NGINX port for the API to listen on
-        logActions: false // Log when a request is made
+        logActions: false, // Log when a request is made
+        newLicenseSecret: "somesecretlol" // The secret used to create a new license (/addLicense)
     },
 
     // Permission Settings (REQUIRED)
